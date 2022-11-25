@@ -1,0 +1,335 @@
+<html>
+
+<head>
+    <title>My Reserve Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    </link>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
+        integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./css/custom.css">
+    </link>
+
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body class="text-center">
+    <div id="app">
+        <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+            <header class="masthead">
+                <div class="inner">
+                    <h3 class="masthead-brand">My Reserve Tracker</h3>
+                    <nav class="nav nav-masthead justify-content-center">
+                        <a v-on:click="setPage('myReserves')" class="nav-link" href="#">My Reserves</a>
+                        <a v-on:click="setPage('dateCalculator')" class="nav-link" href="#">Date Calculator</a>
+                    </nav>
+                </div>
+            </header>
+
+            <main v-show="activePage == 'welcome'" role="main" class="inner cover">
+                <p class="lead">
+                    <a v-on:click="setPage('myReserves')" href="#" class="btn btn-lg btn-secondary">My Reserves</a>
+                </p>
+                <p class="lead">
+                    <a v-on:click="setPage('dateCalculator')" href="#" class="btn btn-lg btn-secondary">Date
+                        Calculator</a>
+                </p>
+            </main>
+
+            <main v-show="activePage == 'myReserves'" role="main" class="inner cover">
+                <div class="row">
+                    <div class="col-sm-12 text-right">
+                        <button type="button" data-toggle="modal" data-target="#edit-modal" class="btn btn-primary">Add
+                            Reserve</button>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div v-for="system in systems" class="col-sm-6 mb-2">
+                        <div class="card">
+                            <img class="card-img-top" src="https://via.placeholder.com/150" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">{{system.owner.firstName}} {{system.owner.lastName}}</h5>
+                                <p class="card-text">
+                                    <span :class="getDueDateClass(system)">
+                                        Due Date: {{system.dueDate | formatDate}}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+
+            <main v-show="activePage == 'dateCalculator'" role="main" class="inner cover">
+                <div class="row">
+                    <div class="col-sm-12 mb-2">
+                        <div class="card m-auto" style="width: 18rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{getMinus180Days()}}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">-180 Days</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label>Pick a Date</label>
+                        <input class="datepicker" id="dateCalculatorDate" v-model="dateCalculatorDate" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 mt-2">
+                        <div class="card m-auto" style="width: 18rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{getPlus180Days()}}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">+180 Days</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+
+
+            <footer class="mastfoot mt-auto">
+                <div class="inner">
+                    <p>A personal tracking app for all your parachute reserve tracking needs.</p>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade custom-modal" id="edit-modal" tabindex="-1" role="dialog"
+            aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            System
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Image -->
+                            <div class="col-sm-12 col-md-6">
+                                <img src="" />
+                                <br>
+                                <!-- Button trigger modal -->
+                                <button v-on:click="startStream()" type="button" class="btn btn-primary" data-toggle="modal" data-target="#camera-modal">
+                                    <i class="fa-solid fa-camera"></i>
+                                </button>
+                            </div>
+
+                            <!-- Owner / Pack Date -->
+                            <div class="col-sm-12 col-md-6">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Pack Date: <input id="packDate" class="datepicker"
+                                                :value="currentSystem.packDate | formatDate"
+                                                @input="value=>date=value" /></label><br>
+                                        <span>Due Date: {{currentSystem.dueDate | formatDate}}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>First Name:<input v-model="currentSystem.owner.firstName" /></label>
+                                        <label>Last Name:<input v-model="currentSystem.owner.lastName" /></label>
+                                        <label>Phone Number:<input v-model="currentSystem.owner.phoneNumber" /></label>
+                                        <label>Email:<input v-model="currentSystem.owner.email" /></label>
+                                        <label>Address:<textarea
+                                                v-model="currentSystem.owner.address"></textarea></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="home-tab" data-toggle="tab"
+                                            href="#edit-modal-reserve" role="tab" aria-controls="edit-modal-reserve"
+                                            aria-selected="true">Reserve</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#edit-modal-aad"
+                                            role="tab" aria-controls="edit-modal-aad" aria-selected="false">AAD</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="contact-tab" data-toggle="tab"
+                                            href="#edit-modal-container" role="tab" aria-controls="edit-modal-container"
+                                            aria-selected="false">Container</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#edit-modal-main"
+                                            role="tab" aria-controls="edit-modal-main" aria-selected="false">Main</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="myTabContent">
+                                    <div class="tab-pane fade show active" id="edit-modal-reserve" role="tabpanel"
+                                        aria-labelledby="home-tab">
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Make:</label>
+                                            <input v-model="currentSystem.reserveComponent.make" type="text"
+                                                class="form-control" id="reserve-make-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Model:</label>
+                                            <input v-model="currentSystem.reserveComponent.model" type="text"
+                                                class="form-control" id="reserve-model-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">S/N:</label>
+                                            <input v-model="currentSystem.reserveComponent.serialNumber" type="text"
+                                                class="form-control" id="reserve-serialNumber-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">DOM:</label>
+                                            <input v-model="currentSystem.reserveComponent.dom" type="text"
+                                                class="form-control" id="reserve-dom-input" placeholder="">
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="edit-modal-aad" role="tabpanel"
+                                        aria-labelledby="profile-tab">
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Make:</label>
+                                            <input v-model="currentSystem.aadComponent.make" type="text"
+                                                class="form-control" id="aad-make-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Model:</label>
+                                            <input v-model="currentSystem.aadComponent.model" type="text"
+                                                class="form-control" id="aad-model-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">S/N:</label>
+                                            <input v-model="currentSystem.aadComponent.serialNumber" type="text"
+                                                class="form-control" id="aad-serialNumber-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">DOM:</label>
+                                            <input v-model="currentSystem.aadComponent.dom" type="text"
+                                                class="form-control" id="aad-dom-input" placeholder="">
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="edit-modal-container" role="tabpanel"
+                                        aria-labelledby="contact-tab">
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Make:</label>
+                                            <input v-model="currentSystem.containerComponent.make" type="text"
+                                                class="form-control" id="container-make-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Model:</label>
+                                            <input v-model="currentSystem.containerComponent.model" type="text"
+                                                class="form-control" id="container-model-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">S/N:</label>
+                                            <input v-model="currentSystem.containerComponent.serialNumber" type="text"
+                                                class="form-control" id="container-serialNumber-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">DOM:</label>
+                                            <input v-model="currentSystem.containerComponent.dom" type="text"
+                                                class="form-control" id="container-dom-input" placeholder="">
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="edit-modal-main" role="tabpanel"
+                                        aria-labelledby="contact-tab">
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Make:</label>
+                                            <input v-model="currentSystem.mainComponent.make" type="text"
+                                                class="form-control" id="main-make-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">Model:</label>
+                                            <input v-model="currentSystem.mainComponent.model" type="text"
+                                                class="form-control" id="main-model-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">S/N:</label>
+                                            <input v-model="currentSystem.mainComponent.serialNumber" type="text"
+                                                class="form-control" id="main-serialNumber-input" placeholder="">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reserve-make-input">DOM:</label>
+                                            <input v-model="currentSystem.mainComponent.dom" type="text"
+                                                class="form-control" id="main-dom-input" placeholder="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-s-12">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button v-on:click="saveCurrentSystem()" type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="camera-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <video id="video" width="320" height="240" autoplay></video>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"
+        integrity="sha256-xLD7nhI62fcsEZK2/v8LsBcb4lG7dgULkuXoXB/j91c=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.13/dist/vue.js"></script>
+
+    <script src="./js/System.js?12"></script>
+    <script src="./js/Owner.js?12"></script>
+    <script src="./js/Component.js?12"></script>
+    <script src="./js/main.js?12"></script>
+</body>
+
+</html>

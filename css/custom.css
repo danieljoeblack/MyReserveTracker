@@ -1,0 +1,23 @@
+body{
+    background-color: #333;
+    color: white;
+}
+#app{
+    max-width: 900px;
+    margin: auto;
+}
+.modal-content{
+    background-color: #333;
+  }
+.card{
+    color: black !important;
+}
+.green{
+    color: green;
+}
+.orange{
+    color: orange;
+}
+.red   {
+    color: red;
+}
